@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pathwise</title>
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon-192.png"><meta name="theme-color" content="#0e1424"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Pathwise">
+<style>
+:root{--bg:#f2f4f8;--card:#fff;--ink:#111a33;--mut:#5d6785;--line:#dde2ee;--acc:#1d4ed8;--accink:#fff;--warn:#b45309;--bad:#b91c1c;--ok:#15803d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0e1424;--card:#171f36;--ink:#e8ecf8;--mut:#9aa5c6;--line:#2a3555;--acc:#6e9bff;--accink:#0e1424;--warn:#f5b04d;--bad:#ff8a8a;--ok:#5fd18a}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0e1424;--card:#171f36;--ink:#e8ecf8;--mut:#9aa5c6;--line:#2a3555;--acc:#6e9bff;--accink:#0e1424;--warn:#f5b04d;--bad:#ff8a8a;--ok:#5fd18a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 "Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:960px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:1.9rem;margin:0;font-weight:800;letter-spacing:-.02em}
+.sub{color:var(--mut);margin:2px 0 0;font-size:.95rem}
+button,input,select,textarea{font:inherit;color:inherit}
+.btn{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer}
+.btn.p{background:var(--acc);color:var(--accink);border-color:var(--acc);font-weight:600}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.day:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.stat{flex:1 1 120px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.stat b{font-size:1.6rem;display:block;line-height:1.1}.stat span{color:var(--mut);font-size:.85rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+h2{font-size:1.1rem;margin:0 0 12px}
+label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 3px}
+input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.cal-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.dow{font-size:.75rem;color:var(--mut)}
+.day{border:0;background:none;border-radius:9px;padding:6px 0;min-height:44px;cursor:pointer;position:relative}
+.day:hover{background:var(--bg)}.day.today{border:1.5px solid var(--acc)}.day.sel{background:var(--acc);color:var(--accink)}
+.day i{display:block;width:6px;height:6px;border-radius:50%;background:var(--warn);margin:2px auto 0}.day.sel i{background:var(--accink)}
+.day.out{opacity:.35}
+.item{display:flex;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.item:first-child{border-top:0}
+.item input[type=checkbox]{width:20px;height:20px;margin-top:3px;flex:none}
+.item .t{font-weight:600}.item.done .t{text-decoration:line-through;color:var(--mut)}
+.meta{font-size:.85rem;color:var(--mut)}
+.left{font-weight:600;font-size:.85rem}.left.soon{color:var(--warn)}.left.late{color:var(--bad)}.left.fine{color:var(--ok)}
+.tag{font-size:.72rem;border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-left:6px}
+.x{margin-left:auto;background:none;border:0;color:var(--mut);cursor:pointer;font-size:1.2rem;align-self:flex-start}
+.toasts{position:fixed;right:12px;left:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none;z-index:20}
+.toast{background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;max-width:420px;pointer-events:auto;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.lock{position:fixed;inset:0;background:var(--bg);display:none;place-items:center;z-index:30;padding:20px}
+.lock.on{display:grid}.lock .card{max-width:320px;width:100%;text-align:center}
+.empty{color:var(--mut);padding:8px 0}
+
+nav{display:flex;gap:6px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:16px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+nav button{flex:1;border:0;background:none;border-radius:9px;padding:9px;cursor:pointer;font-weight:600;color:var(--mut)}
+nav button.on{background:var(--acc);color:var(--accink)}
+.hero{text-align:center;padding:8px 0 14px}.hero small{color:var(--mut)}
+.hero h1{font-size:2.6rem;letter-spacing:.04em}
+.big{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.big .stat b{font-size:2.2rem}
+.dots{display:grid;grid-template-columns:repeat(auto-fill,minmax(13px,1fr));gap:5px;margin-top:12px}
+.dots i{aspect-ratio:1;border-radius:50%;border:1.5px solid var(--line)}
+.dots i.p{background:var(--acc);border-color:var(--acc)}
+.dots i.t{background:var(--warn);border-color:var(--warn);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.5)}}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.85rem;color:var(--mut);margin-top:10px}
+[hidden]{display:none!important}
+#splash{position:fixed;inset:0;z-index:40;background:#0e1424;color:#e8ecf8;display:grid;place-items:center;text-align:center;transition:opacity .6s,visibility .6s}
+#splash.out{opacity:0;visibility:hidden}
+.ring{position:relative;width:200px;height:200px;margin:0 auto 22px}
+.ring i{position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px;border-radius:50%;background:#6e9bff;opacity:0;transform:rotate(calc(var(--n)*15deg)) translateY(-90px) scale(.2);animation:dot .5s forwards;animation-delay:calc(var(--n)*45ms)}
+.ring i:nth-child(n+17){background:#f5b04d;transform:rotate(calc(var(--n)*15deg)) translateY(-60px) scale(.2)}
+@keyframes dot{to{opacity:1;transform:rotate(calc(var(--n)*15deg)) translateY(-90px) scale(1)}}
+.ring i:nth-child(n+17){animation-name:dot2}
+@keyframes dot2{to{opacity:1;transform:rotate(calc(var(--n)*15deg)) translateY(-60px) scale(.8)}}
+#splash h2{font-size:2.4rem;letter-spacing:.2em;margin:0;font-weight:800}
+#splash h2 span{display:inline-block;opacity:0;transform:translateY(14px);animation:up .5s forwards;animation-delay:calc(1s + var(--l)*90ms)}
+@keyframes up{to{opacity:1;transform:none}}
+#splash p{opacity:0;animation:up .6s 1.9s forwards;color:#9aa5c6;margin:8px 0 0}
+@media (prefers-reduced-motion:reduce){.ring i,#splash h2 span,#splash p{animation-duration:.01s;animation-delay:0s}.dots i.t{animation:none}}
+</style></head>
+<body>
+<div id="splash"><div><div class="ring"><i style="--n:0"></i><i style="--n:1"></i><i style="--n:2"></i><i style="--n:3"></i><i style="--n:4"></i><i style="--n:5"></i><i style="--n:6"></i><i style="--n:7"></i><i style="--n:8"></i><i style="--n:9"></i><i style="--n:10"></i><i style="--n:11"></i><i style="--n:12"></i><i style="--n:13"></i><i style="--n:14"></i><i style="--n:15"></i><i style="--n:16"></i><i style="--n:17"></i><i style="--n:18"></i><i style="--n:19"></i><i style="--n:20"></i><i style="--n:21"></i><i style="--n:22"></i><i style="--n:23"></i></div><h2><span style="--l:0">M</span><span style="--l:1">R</span><span style="--l:2">&nbsp;</span><span style="--l:3">D</span><span style="--l:4">A</span><span style="--l:5">D</span><span style="--l:6">A</span></h2><p>Make every day count.</p></div></div>
+<div class="lock" id="lock"><div class="card"><h2>Pathwise is locked</h2><p class="meta">Enter your PIN to open your private tasks.</p><input id="pin" type="password" inputmode="numeric" autocomplete="off" aria-label="PIN"><p class="meta" id="pinerr" style="color:var(--bad)"></p><button class="btn p" id="unlock">Unlock</button></div></div>
+<div class="wrap">
+<nav><button id="tH" class="on">Home</button><button id="tP">Planner</button></nav>
+<section id="home"><div class="hero"><small id="greet"></small><h1>MR DADA</h1><small id="today"></small></div>
+<div class="big"><div class="stat"><b id="h1">0</b><span>days passed</span></div><div class="stat"><b id="h2">0</b><span>days left</span></div><div class="stat"><b id="h3">0</b><span>total days</span></div></div>
+<div class="card"><h2 id="yr"></h2><div class="dots" id="dots" aria-label="Year in dots"></div>
+<div class="legend"><span>● Passed</span><span style="color:var(--warn)">● Today</span><span>○ Still ahead</span></div></div>
+<p class="meta" id="htask" style="margin:14px 0"></p><button class="btn p" id="goP">Open planner</button></section>
+<section id="planner" hidden>
+<header><div><h1>Pathwise</h1><p class="sub">Your private plan for tasks, goals and deadlines.</p></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="notif">Enable alerts</button><button class="btn" id="setpin">Set PIN lock</button></div></header>
+<div class="stats"><div class="stat"><b id="s1">0</b><span>open</span></div><div class="stat"><b id="s2">0</b><span>due today</span></div><div class="stat"><b id="s3">0</b><span>overdue</span></div><div class="stat"><b id="s4">0%</b><span>completed</span></div></div>
+<div class="grid">
+<div>
+<div class="card"><h2>Add a task or goal</h2>
+<label for="title">What do you want to achieve?</label><input id="title" maxlength="120" placeholder="e.g. Finish portfolio project">
+<div class="row"><div><label for="kind">Type</label><select id="kind"><option value="Task">Task</option><option value="Goal">Goal</option></select></div>
+<div><label for="due">Due date and time</label><input id="due" type="datetime-local"></div></div>
+<label for="notes">Notes (optional)</label><textarea id="notes" rows="2" placeholder="Why it matters, first step…"></textarea>
+<p style="margin:12px 0 0"><button class="btn p" id="add">Save privately</button></p></div>
+<div class="card" style="margin-top:16px"><div class="cal-h"><button class="btn" id="prev" aria-label="Previous month">‹</button><h2 id="mon" style="margin:0"></h2><button class="btn" id="next" aria-label="Next month">›</button></div>
+<div class="cal" id="cal"></div><p class="meta" style="margin:8px 0 0">Dots mark days with open items. Select a day to filter the list.</p></div>
+</div>
+<div class="card"><div class="cal-h"><h2 id="lh" style="margin:0">Upcoming</h2><button class="btn" id="clr" style="display:none">Show all</button></div><div id="list"></div></div>
+</div>
+<p class="meta" style="margin-top:18px">Everything is saved only in this browser on this device. Nobody else can see it. The PIN is a screen lock, not encryption. Reminders fire 10 minutes before and at the due time while this page is open.</p>
+</section></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script>
+(function(){
+var KEY="pathwise-v1",S={items:[],pin:""},sel=null,vm=new Date();vm.setDate(1);
+function load(){try{var r=localStorage.getItem(KEY);if(r){var d=JSON.parse(r);if(d&&d.items)S=d}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast("Could not save in this browser.")}}
+function $(i){return document.getElementById(i)}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function pad(n){return(n<10?"0":"")+n}
+function dk(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())}
+function left(ms){var a=Math.abs(ms),m=Math.floor(a/6e4),h=Math.floor(m/60),d=Math.floor(h/24);
+var t=d>0?d+"d "+(h%24)+"h":h>0?h+"h "+(m%60)+"m":Math.max(m,1)+"m";return ms<0?t+" overdue":t+" left"}
+function toast(msg){var t=document.createElement("div");t.className="toast";t.textContent=msg;$("toasts").appendChild(t);setTimeout(function(){t.remove()},9000)}
+function beep(){try{var c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.08;o.start();o.stop(c.currentTime+.25)}catch(e){}}
+function alertUser(msg){toast(msg);beep();try{if("Notification" in window&&Notification.permission==="granted")new Notification("Pathwise",{body:msg})}catch(e){}}
+function render(){homeRender();
+var now=Date.now(),open=S.items.filter(function(i){return!i.done}),td=dk(new Date());
+$("s1").textContent=open.length;
+$("s2").textContent=open.filter(function(i){return dk(new Date(i.due))===td}).length;
+$("s3").textContent=open.filter(function(i){return new Date(i.due)<now}).length;
+$("s4").textContent=S.items.length?Math.round(100*(S.items.length-open.length)/S.items.length)+"%":"0%";
+var list=S.items.slice().sort(function(a,b){return a.done-b.done||new Date(a.due)-new Date(b.due)});
+if(sel)list=list.filter(function(i){return dk(new Date(i.due))===sel});
+$("clr").style.display=sel?"":"none";
+$("lh").textContent=sel?"Items on "+new Date(sel+"T00:00").toLocaleDateString(undefined,{day:"numeric",month:"long"}):"Upcoming";
+$("list").innerHTML=list.length?list.map(function(i){
+var ms=new Date(i.due)-now,cls=i.done?"":ms<0?"late":ms<864e5?"soon":"fine";
+return '<div class="item'+(i.done?" done":"")+'"><input type="checkbox" data-d="'+i.id+'" aria-label="Mark done"'+(i.done?" checked":"")+'><div><div class="t">'+esc(i.title)+'<span class="tag">'+i.kind+'</span></div><div class="meta">'+new Date(i.due).toLocaleString(undefined,{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})+(i.notes?" · "+esc(i.notes):"")+'</div>'+(i.done?"":'<div class="left '+cls+'">'+left(ms)+'</div>')+'</div><button class="x" data-x="'+i.id+'" aria-label="Delete">×</button></div>'}).join(""):'<p class="empty">Nothing here yet. Add your first task or goal and set a due time.</p>';
+cal()}
+function cal(){
+var y=vm.getFullYear(),m=vm.getMonth(),first=new Date(y,m,1).getDay(),n=new Date(y,m+1,0).getDate(),td=dk(new Date());
+var marks={};S.items.forEach(function(i){if(!i.done)marks[dk(new Date(i.due))]=1});
+$("mon").textContent=vm.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+var h=["S","M","T","W","T","F","S"].map(function(d){return'<div class="dow">'+d+'</div>'}).join("");
+for(var k=0;k<first;k++)h+="<div></div>";
+for(var d=1;d<=n;d++){var key=y+"-"+pad(m+1)+"-"+pad(d);
+h+='<button class="day'+(key===td?" today":"")+(key===sel?" sel":"")+'" data-k="'+key+'">'+d+(marks[key]?"<i></i>":"<i style='background:none'></i>")+'</button>'}
+$("cal").innerHTML=h}
+function check(){var now=Date.now(),ch=false;
+S.items.forEach(function(i){if(i.done)return;var ms=new Date(i.due)-now;
+if(ms<=0&&!i.n2){i.n2=i.n1=1;ch=true;alertUser(i.kind+" due now: "+i.title)}
+else if(ms>0&&ms<=6e5&&!i.n1){i.n1=1;ch=true;alertUser("In "+Math.ceil(ms/6e4)+" min: "+i.title)}});
+if(ch)save();render()}
+$("add").onclick=function(){var t=$("title").value.trim(),d=$("due").value;
+if(!t||!d){toast("Add a title and a due date and time.");return}
+S.items.push({id:String(Date.now()),title:t,kind:$("kind").value,due:d,notes:$("notes").value.trim(),done:false});
+save();$("title").value="";$("notes").value="";toast("Saved privately in this browser.");check()};
+$("list").onclick=function(e){var x=e.target.getAttribute("data-x"),c=e.target.getAttribute("data-d");
+if(x){S.items=S.items.filter(function(i){return i.id!==x})}
+else if(c){S.items.forEach(function(i){if(i.id===c){i.done=e.target.checked;if(i.done)toast("Nice work. Finished: "+i.title)}})}
+else return;save();render()};
+$("cal").onclick=function(e){var k=e.target.closest(".day");if(!k)return;var key=k.getAttribute("data-k");sel=sel===key?null:key;render()};
+$("clr").onclick=function(){sel=null;render()};
+$("prev").onclick=function(){vm.setMonth(vm.getMonth()-1);cal()};
+$("next").onclick=function(){vm.setMonth(vm.getMonth()+1);cal()};
+$("notif").onclick=function(){try{if(!("Notification" in window)){toast("This browser can’t show system alerts. In-page alerts still work.");return}
+Notification.requestPermission().then(function(p){toast(p==="granted"?"System alerts enabled.":"System alerts blocked. In-page alerts still work.")})}catch(e){toast("System alerts aren’t available here. In-page alerts still work.")}};
+$("setpin").onclick=function(){var p=prompt(S.pin?"Enter a new PIN, or leave empty to remove the lock:":"Choose a PIN (4 to 8 digits):");
+if(p===null)return;p=p.trim();if(p&&!/^\d{4,8}$/.test(p)){toast("PIN must be 4 to 8 digits.");return}
+S.pin=p;save();toast(p?"PIN lock is on.":"PIN lock removed.")};
+$("unlock").onclick=function(){if($("pin").value===S.pin){$("lock").classList.remove("on");$("pin").value="";$("pinerr").textContent=""}else $("pinerr").textContent="Wrong PIN. Try again."};
+$("pin").onkeydown=function(e){if(e.key==="Enter")$("unlock").click()};
+
+function homeRender(){var n=new Date(),y=n.getFullYear(),s=new Date(y,0,1),e=new Date(y+1,0,1),tot=Math.round((e-s)/864e5),doy=Math.floor((new Date(y,n.getMonth(),n.getDate())-s)/864e5)+1;
+var hr=n.getHours();$("greet").textContent=hr<12?"Good morning":hr<17?"Good afternoon":"Good evening";
+$("today").textContent=n.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+$("h1").textContent=doy-1;$("h2").textContent=tot-doy;$("h3").textContent=tot;
+$("yr").textContent=y+": day "+doy+" of "+tot+" ("+Math.round(100*doy/tot)+"%)";
+if($("dots").childElementCount!==tot||$("dots").dataset.d!==String(doy)){var h="";for(var i=1;i<=tot;i++)h+='<i class="'+(i<doy?"p":i===doy?"t":"")+'"></i>';$("dots").innerHTML=h;$("dots").dataset.d=doy}
+var td=dk(n),c=S.items.filter(function(i){return!i.done&&dk(new Date(i.due))===td}).length;
+$("htask").textContent=c?"You have "+c+" open item"+(c>1?"s":"")+" due today.":"Nothing due today. Plan your next win."}
+function tab(p){$("home").hidden=p;$("planner").hidden=!p;$("tH").className=p?"":"on";$("tP").className=p?"on":"";window.scrollTo(0,0)}
+$("tH").onclick=function(){tab(false)};$("tP").onclick=function(){tab(true)};$("goP").onclick=function(){tab(true)};
+setTimeout(function(){$("splash").classList.add("out")},3000);
+try{if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0)navigator.serviceWorker.register("sw.js")}catch(e){}
+load();if(S.pin)$("lock").classList.add("on");
+var n=new Date(Date.now()+36e5);$("due").value=dk(n)+"T"+pad(n.getHours())+":00";
+check();setInterval(check,20000);
+})();
+</script></body></html>
